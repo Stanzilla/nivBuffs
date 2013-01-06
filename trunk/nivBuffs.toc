@@ -1,0 +1,24 @@
+## Interface: 50100
+## Title: nivBuffs
+## Author: Luzzifus, Caleb
+## OptionalDeps: Masque
+## SavedVariables: nivBuffDB
+
+#@no-lib-strip@
+embeds.xml
+#@end-no-lib-strip@
+
+Locales\enUS.lua
+Locales\deDE.lua
+Locales\esES.lua
+Locales\esMX.lua
+Locales\frFR.lua
+Locales\itIT.lua
+Locales\koKR.lua
+Locales\ptBR.lua
+Locales\ruRU.lua
+Locales\zhCN.lua
+Locales\zhTW.lua
+
+nivAuraButtonTemplate.xml
+nivBuffs.lua
