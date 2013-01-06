@@ -37,6 +37,7 @@ local tonumber = tonumber
 local tostring = tostring
 local pairs = pairs
 local print = print
+local next = next
 local UIParent = UIParent
 
 local BF = nil
@@ -160,11 +161,49 @@ do
 	function debuffHeader:ActiveButtons() return btn_iterator, self, 0 end
 end
 
+function addon:showDurationBar(btn)
+	local ic = btn.icon
+	local br, bg
+	if addon.db.profile.showDurationBar then
+		br = CreateFrame("STATUSBAR", nil, ic)
+		br:SetPoint("TOPLEFT", ic, "TOPLEFT", 3, -3)
+		br:SetPoint("BOTTOMLEFT", ic, "BOTTOMLEFT", 3, 3)
+		br:SetWidth(2)
+		br:SetStatusBarTexture("Interface\\Addons\\nivBuffs\\Textures\\bar")
+		br:SetOrientation("VERTICAL")
+		btn.bar = br
+
+		bg = br:CreateTexture(nil, "BACKGROUND")
+		bg:SetPoint("TOPLEFT", ic, "TOPLEFT", 3, -3)
+		bg:SetPoint("BOTTOMLEFT", ic, "BOTTOMLEFT", 3, 3)
+		bg:SetWidth(3)
+		bg:SetTexture("Interface\\Addons\\nivBuffs\\Textures\\bar")
+		bg:SetTexCoord(0, 1, 0, 1)
+		bg:SetVertexColor(0, 0, 0, 0.6)
+		btn.bar.bg = bg
+	else
+		if btn.bar then btn.bar:Hide() btn.bar.bg:Hide() end
+	end
+end
+
+function addon:durationPos(btn)
+	local dX, dY = addon.db.profile.durationXoffset, addon.db.profile.durationYoffset
+	btn.text:ClearAllPoints()
+	if addon.db.profile.durationPos == "TOP" then btn.text:SetPoint("BOTTOM", btn.icon, "TOP", dX, 2 + dY)
+	elseif addon.db.profile.durationPos == "LEFT" then btn.text:SetPoint("RIGHT", btn.icon, "LEFT", dX - 2, dY)
+	elseif addon.db.profile.durationPos == "RIGHT" then btn.text:SetPoint("LEFT", btn.icon, "RIGHT", 2 + dX, dY)
+	else btn.text:SetPoint("TOP", btn.icon, "BOTTOM", dX,  dY - 2) end
+end
+
+function addon:stackPos(btn)
+	btn.stacks:ClearAllPoints()
+	btn.stacks:SetPoint("BOTTOMRIGHT", btn.icon, "BOTTOMRIGHT", 4 + addon.db.profile.stacksXoffset, addon.db.profile.stacksYoffset - 2)
+end
+
 function addon:createAuraButton(btn, filter)
 	local s, b = 3, 3 / 28
 	local n = addon.db.profile
 
-	local dX, dY = n.durationXoffset, n.durationYoffset
 	local ic, tx, cd, br, bd, bg, vf, dr, st
 
 	-- border texture
@@ -198,24 +237,7 @@ function addon:createAuraButton(btn, filter)
 		btn.cd = cd
 	end
 
-	if n.showDurationBar then
-		br = CreateFrame("STATUSBAR", nil, ic)
-		br:SetPoint("TOPLEFT", ic, "TOPLEFT", 3, -3)
-		br:SetPoint("BOTTOMLEFT", ic, "BOTTOMLEFT", 3, 3)
-		br:SetWidth(2)
-		br:SetStatusBarTexture("Interface\\Addons\\nivBuffs\\Textures\\bar")
-		br:SetOrientation("VERTICAL")
-		btn.bar = br
-
-		bg = br:CreateTexture(nil, "BACKGROUND")
-		bg:SetPoint("TOPLEFT", ic, "TOPLEFT", 3, -3)
-		bg:SetPoint("BOTTOMLEFT", ic, "BOTTOMLEFT", 3, 3)
-		bg:SetWidth(3)
-		bg:SetTexture("Interface\\Addons\\nivBuffs\\Textures\\bar")
-		bg:SetTexCoord(0, 1, 0, 1)
-		bg:SetVertexColor(0, 0, 0, 0.6)
-		btn.bar.bg = bg
-	end
+	addon:showDurationBar(btn)
 
 	-- buttonfacade border
 	bd = ic:CreateTexture(nil, "OVERLAY")
@@ -235,10 +257,7 @@ function addon:createAuraButton(btn, filter)
 	dr:SetFont(LSM3:Fetch(LSM3.MediaType.FONT, n.durationFont), n.durationFontSize, n.durationFontStyle)
 	btn.text = dr
 
-	if n.durationPos == "TOP" then dr:SetPoint("BOTTOM", ic, "TOP", dX, 2 + dY)
-	elseif n.durationPos == "LEFT" then dr:SetPoint("RIGHT", ic, "LEFT", dX - 2, dY)
-	elseif n.durationPos == "RIGHT" then dr:SetPoint("LEFT", ic, "RIGHT", 2 + dX, dY)
-	else dr:SetPoint("TOP", ic, "BOTTOM", dX,  dY - 2) end
+	addon:durationPos(btn)
 
 	-- stack count
 	st = vf:CreateFontString(nil, "OVERLAY")
@@ -681,7 +700,7 @@ local LIST_VALUES = {
 	},
 	["outline"] = {
 		NONE         = L["None"],
-		MONOCHROME   = L["Monochrome"],
+		--MONOCHROME   = L["Monochrome"],
 		OUTLINE      = L["Outline"],
 		THICKOUTLINE = L["Thick outline"],
 	},
@@ -792,7 +811,12 @@ local options = {
 			order = 50,
 			type = "toggle",
 			name = L["Show duration bar"],
-			desc = ("|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
+			--desc = ("|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
+			set = function (info, v)
+				addon.db.profile[info[1]] = v
+				for _,btn in buffHeader:ActiveButtons() do addon:showDurationBar(btn) end
+				for _,btn in debuffHeader:ActiveButtons() do addon:showDurationBar(btn) end
+			end,
 		},
 		showDurationTimers = {
 			order = 55,
@@ -812,26 +836,41 @@ local options = {
 			type = "select",
 			name = L["Duration position"],
 			values = LIST_VALUES["durationPos"],
-			desc = ("|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
+			--desc = ("|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
+			set = function (info, v)
+				addon.db.profile[info[1]] = v
+				for _,btn in buffHeader:ActiveButtons() do addon:durationPos(btn) end
+				for _,btn in debuffHeader:ActiveButtons() do addon:durationPos(btn) end
+			end,
 		},
 		durationXoffset = {
 			order = 63,
 			type = "range",
 			name = L["Duration horizontal offset"],
-			desc = L["Positive values adjust to the right, negative values adjust to the left"]..("\n|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
+			desc = L["Positive values adjust to the right, negative values adjust to the left"],
 			min = -100, max = 100, step = 1,
+			set = function (info, v)
+				addon.db.profile[info[1]] = v
+				for _,btn in buffHeader:ActiveButtons() do addon:durationPos(btn) end
+				for _,btn in debuffHeader:ActiveButtons() do addon:durationPos(btn) end
+			end,
 		},
 		durationYoffset = {
 			order = 64,
 			type = "range",
 			name = L["Duration vertical offset"],
-			desc = L["Positive values adjust upwards, negative values adjust downwards"]..("\n|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
+			desc = L["Positive values adjust upwards, negative values adjust downwards"],
 			min = -100, max = 100, step = 1,
+			set = function (info, v)
+				addon.db.profile[info[1]] = v
+				for _,btn in buffHeader:ActiveButtons() do addon:durationPos(btn) end
+				for _,btn in debuffHeader:ActiveButtons() do addon:durationPos(btn) end
+			end,
 		},
 		durationFont = {
 			type = "select",
 			name = L["Duration font"],
-			desc = ("|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
+			--desc = ("|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
 			order = 67,
 			--dialogControl = 'LSM30_Font',
 			values = LSM3:List("font"),
@@ -843,6 +882,8 @@ local options = {
 			set = function(info, v)
 				local list = LSM3:List("font")
 				addon.db.profile[info[1]] = list[v]
+				for _,btn in buffHeader:ActiveButtons() do btn.text:SetFont(LSM3:Fetch(LSM3.MediaType.FONT, addon.db.profile.durationFont), addon.db.profile.durationFontSize, addon.db.profile.durationFontStyle) end
+				for _,btn in debuffHeader:ActiveButtons() do btn.text:SetFont(LSM3:Fetch(LSM3.MediaType.FONT, addon.db.profile.durationFont), addon.db.profile.durationFontSize, addon.db.profile.durationFontStyle) end
 			end,
 		},
 		durationFontStyle = {
@@ -850,32 +891,41 @@ local options = {
 			type = "select",
 			name = L["Duration font outline"],
 			values = LIST_VALUES["outline"],
-			desc = ("|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
+			--desc = ("|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
 			get = function (info)
 				if not addon.db.profile[info[1]] then return "NONE" else return addon.db.profile[info[1]] end
 			end,
 			set = function (info, v)
 				if v == "NONE" then v = nil end
 				addon.db.profile[info[1]] = v
+				for _,btn in buffHeader:ActiveButtons() do btn.text:SetFont(LSM3:Fetch(LSM3.MediaType.FONT, addon.db.profile.durationFont), addon.db.profile.durationFontSize, addon.db.profile.durationFontStyle) end
+				for _,btn in debuffHeader:ActiveButtons() do btn.text:SetFont(LSM3:Fetch(LSM3.MediaType.FONT, addon.db.profile.durationFont), addon.db.profile.durationFontSize, addon.db.profile.durationFontStyle) end
 			end,
 		},
 		durationFontSize = {
 			order = 69,
 			type = "range",
 			name = L["Duration font size"],
-			desc = ("|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
+			--desc = ("|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
 			min = 1, max = 20, step = 1,
+			set = function (info, v)
+				addon.db.profile[info[1]] = v
+				for _,btn in buffHeader:ActiveButtons() do btn.text:SetFont(LSM3:Fetch(LSM3.MediaType.FONT, addon.db.profile.durationFont), addon.db.profile.durationFontSize, addon.db.profile.durationFontStyle) end
+				for _,btn in debuffHeader:ActiveButtons() do btn.text:SetFont(LSM3:Fetch(LSM3.MediaType.FONT, addon.db.profile.durationFont), addon.db.profile.durationFontSize, addon.db.profile.durationFontStyle) end
+			end,
 		},
 		durationFontColor = {
 			order = 70,
 			type = "color",
 			name = L["Duration font color"],
-			desc = ("|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
+			--desc = ("|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
 			get = function(info)
 				return addon.db.profile[info[1]].r, addon.db.profile[info[1]].g, addon.db.profile[info[1]].b
 			end,
 			set = function(info, r, g, b)
 				addon.db.profile[info[1]].r, addon.db.profile[info[1]].g, addon.db.profile[info[1]].b = r, g, b
+				for _,btn in buffHeader:ActiveButtons() do btn.text:SetTextColor(r, g, b) end
+				for _,btn in debuffHeader:ActiveButtons() do btn.text:SetTextColor(r, g, b) end
 			end,
 		},
 		stacks_header = {
@@ -887,20 +937,30 @@ local options = {
 			order = 80,
 			type = "range",
 			name = L["Stack horizontal offset"],
-			desc = L["Positive values adjust to the right, negative values adjust to the left"]..("\n|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
+			desc = L["Positive values adjust to the right, negative values adjust to the left"],
 			min = -100, max = 100, step = 1,
+			set = function (info, v)
+				addon.db.profile[info[1]] = v
+				for _,btn in buffHeader:ActiveButtons() do addon:stackPos(btn) end
+				for _,btn in debuffHeader:ActiveButtons() do addon:stackPos(btn) end
+			end,
 		},
 		stacksYoffset = {
 			order = 81,
 			type = "range",
 			name = L["Stack vertical offset"],
-			desc = L["Positive values adjust upwards, negative values adjust downwards"]..("\n|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
+			desc = L["Positive values adjust upwards, negative values adjust downwards"],
 			min = -100, max = 100, step = 1,
+			set = function (info, v)
+				addon.db.profile[info[1]] = v
+				for _,btn in buffHeader:ActiveButtons() do addon:stackPos(btn) end
+				for _,btn in debuffHeader:ActiveButtons() do addon:stackPos(btn) end
+			end,
 		},
 		stackFont = {
 			type = "select",
 			name = L["Stack font"],
-			desc = ("|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
+			--desc = ("|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
 			order = 87,
 			--dialogControl = 'LSM30_Font',
 			values = LSM3:List("font"),
@@ -912,6 +972,8 @@ local options = {
 			set = function(info, v)
 				local list = LSM3:List("font")
 				addon.db.profile[info[1]] = list[v]
+				for _,btn in buffHeader:ActiveButtons() do btn.stacks:SetFont(LSM3:Fetch(LSM3.MediaType.FONT, addon.db.profile.stackFont), addon.db.profile.stackFontSize, addon.db.profile.stackFontStyle) end
+				for _,btn in debuffHeader:ActiveButtons() do btn.stacks:SetFont(LSM3:Fetch(LSM3.MediaType.FONT, addon.db.profile.stackFont), addon.db.profile.stackFontSize, addon.db.profile.stackFontStyle) end
 			end,
 		},
 		stackFontStyle = {
@@ -919,32 +981,41 @@ local options = {
 			type = "select",
 			name = L["Stack outline"],
 			values = LIST_VALUES["outline"],
-			desc = ("|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
+			--desc = ("|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
 			get = function (info)
 				if not addon.db.profile[info[1]] then return "NONE" else return addon.db.profile[info[1]] end
 			end,
 			set = function (info, v)
 				if v == "NONE" then v = nil end
 				addon.db.profile[info[1]] = v
+				for _,btn in buffHeader:ActiveButtons() do btn.stacks:SetFont(LSM3:Fetch(LSM3.MediaType.FONT, addon.db.profile.stackFont), addon.db.profile.stackFontSize, addon.db.profile.stackFontStyle) end
+				for _,btn in debuffHeader:ActiveButtons() do btn.stacks:SetFont(LSM3:Fetch(LSM3.MediaType.FONT, addon.db.profile.stackFont), addon.db.profile.stackFontSize, addon.db.profile.stackFontStyle) end
 			end,
 		},
 		stackFontSize = {
 			order = 89,
 			type = "range",
 			name = L["Stack size"],
-			desc = ("|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
+			--desc = ("|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
 			min = 1, max = 20, step = 1,
+			set = function (info, v)
+				addon.db.profile[info[1]] = v
+				for _,btn in buffHeader:ActiveButtons() do btn.stacks:SetFont(LSM3:Fetch(LSM3.MediaType.FONT, addon.db.profile.stackFont), addon.db.profile.stackFontSize, addon.db.profile.stackFontStyle) end
+				for _,btn in debuffHeader:ActiveButtons() do btn.stacks:SetFont(LSM3:Fetch(LSM3.MediaType.FONT, addon.db.profile.stackFont), addon.db.profile.stackFontSize, addon.db.profile.stackFontStyle) end
+			end,
 		},
 		stackFontColor = {
 			order = 90,
 			type = "color",
 			name = L["Stack font color"],
-			desc = ("|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
+			--desc = ("|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
 			get = function(info)
 				return addon.db.profile[info[1]].r, addon.db.profile[info[1]].g, addon.db.profile[info[1]].b
 			end,
 			set = function(info, r, g, b)
 				addon.db.profile[info[1]].r, addon.db.profile[info[1]].g, addon.db.profile[info[1]].b = r, g, b
+				for _,btn in buffHeader:ActiveButtons() do btn.stacks:SetTextColor(r, g, b) end
+				for _,btn in debuffHeader:ActiveButtons() do btn.stacks:SetTextColor(r, g, b) end
 			end,
 		},
 		-- BUFFS
