@@ -39,6 +39,7 @@ local pairs = pairs
 local print = print
 local next = next
 local UIParent = UIParent
+local UnitInVehicle = UnitInVehicle
 
 local BF = nil
 local grey = nil
@@ -147,6 +148,18 @@ local bfButtons = {}
 -- init secure aura headers
 local buffHeader = CreateFrame("Frame", "nivBuffs_Buffs", UIParent, "SecureAuraHeaderTemplate")
 local debuffHeader = CreateFrame("Frame", "nivBuffs_Debuffs", UIParent, "SecureAuraHeaderTemplate")
+local nivBuffsSecStateHandler = CreateFrame("Frame", nil, nil, "SecureHandlerStateTemplate")
+nivBuffsSecStateHandler:SetAttribute("_onstate-aurastate", [[
+local buffs = self:GetFrameRef("nivBuffs_Buffs")
+local debuffs = self:GetFrameRef("nivBuffs_Debuffs")
+local state = newstate == "invehicle" and "vehicle" or "player"
+buffs:SetAttribute("unit",state)
+debuffs:SetAttribute("unit",state)
+]])
+
+nivBuffsSecStateHandler:SetFrameRef("nivBuffs_Buffs", buffHeader)
+nivBuffsSecStateHandler:SetFrameRef("nivBuffs_Debuffs", debuffHeader)
+RegisterStateDriver(nivBuffsSecStateHandler, "aurastate", "[vehicleui] invehicle; notinvehicle")
 
 do
 	local child
@@ -341,7 +354,7 @@ do
 		if btn.lastUpdate < btn.freq then btn.lastUpdate = btn.lastUpdate + elapsed; return end
 		btn.lastUpdate = 0
 
-		name, _, _, _, _, duration, eTime = UnitAura("player", btn:GetID(), btn.filter)
+		name, _, _, _, _, duration, eTime = UnitAura(UnitInVehicle("player") and "vehicle" or "player", btn:GetID(), btn.filter)
 		if name and duration > 0 then
 			msecs = eTime - GetTime()
 			btn.text:SetText(formatTimeRemaining(msecs))
@@ -383,8 +396,7 @@ do
 
 	updateAuraButtonStyle = function(btn, filter)
 		if not btn.created then addon:createAuraButton(btn, filter) end
-
-		name, _, icon, count, dType, duration, eTime = UnitAura("player", btn:GetID(), filter)
+		name, _, icon, count, dType, duration, eTime = UnitAura(UnitInVehicle("player") and "vehicle" or "player", btn:GetID(), filter)
 		if name then
 			btn.icon.tex:SetTexture(icon)
 
@@ -490,7 +502,7 @@ do
 
 	updateStyle = function(header, event, unit)
 		if event == "UNIT_AURA" and unit ~= "player" and unit ~= "vehicle" then return end
-		for _,btn in header:ActiveButtons() do btn:Hide() updateAuraButtonStyle(btn, header.filter) btn:Show() end
+		for _,btn in header:ActiveButtons() do updateAuraButtonStyle(btn, header.filter) end
 		if header.filter == "HELPFUL" then
 			hasMHe, MHrTime, _, hasOHe, OHrTime = GetWeaponEnchantInfo()
 			wEnch1 = buffHeader:GetAttribute("tempEnchant1")
@@ -506,7 +518,7 @@ local function setHeaderAttributes(header, template, isBuff)
 	local s = function(...) header:SetAttribute(...) end
 	local n = addon.db.profile
 
-	s("unit", "player")
+	s("unit", UnitInVehicle("player") and "vehicle" or "player")
 	s("filter", isBuff and "HELPFUL" or "HARMFUL")
 	s("template", template)
 	s("separateOwn", 0)
@@ -1309,16 +1321,9 @@ function nivBuffs:ADDON_LOADED(event, addon)
 		self.db.RegisterCallback(self, "OnProfileCopied", profileUpdate)
 		self.db.RegisterCallback(self, "OnProfileReset", profileUpdate)
 
-		local nivBuffsProfileOptionsTable = LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db)
-		nivBuffsProfileOptionsTable.args.warning = {
-			type = "description",
-			fontSize = "large",
-			name = ("|cffff0000%s|r\n"):format(L["For any kind of profile change to fully take effect, you need to reaload UI!"]),
-			order = 0,
-		},
 		LibStub("AceConfig-3.0"):RegisterOptionsTable("nivBuffs", options)
 		LibStub("AceConfigDialog-3.0"):AddToBlizOptions("nivBuffs", "nivBuffs")
-		LibStub("AceConfig-3.0"):RegisterOptionsTable("nivBuffs Profile", nivBuffsProfileOptionsTable)
+		LibStub("AceConfig-3.0"):RegisterOptionsTable("nivBuffs Profile", LibStub("AceDBOptions-3.0"):GetOptionsTable(self.db))
 		LibStub("AceConfigDialog-3.0"):AddToBlizOptions("nivBuffs Profile", L["Profile"], "nivBuffs")
 
 		SlashCmdList.nivBuffs = slashCommand
