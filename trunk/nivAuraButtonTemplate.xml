@@ -16,7 +16,7 @@
 				if s == 16 or s == 17 or s == 18 then
 					GameTooltip:SetInventoryItem("player", s);
 				else
-					GameTooltip:SetUnitAura("player", self:GetID(), "HELPFUL");
+					GameTooltip:SetUnitAura(UnitInVehicle("player") and "vehicle" or "player", self:GetID(), "HELPFUL");
 				end
 			</OnEnter>
 			<OnLeave>
@@ -30,7 +30,7 @@
 			<OnEnter>
 				GameTooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT");
 				GameTooltip:SetFrameLevel(self:GetFrameLevel() + 2);
-				GameTooltip:SetUnitAura("player", self:GetID(), "HARMFUL");
+				GameTooltip:SetUnitAura(UnitInVehicle("player") and "vehicle" or "player", self:GetID(), "HARMFUL");
 			</OnEnter>
 			<OnLeave>
 				GameTooltip:Hide();
