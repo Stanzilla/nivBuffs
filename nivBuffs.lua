@@ -501,6 +501,11 @@ do
 	local hasMHe, MHrTime, hasOHe, OHrTime, wEnch1, wEnch2
 
 	updateStyle = function(header, event, unit)
+		if event == "PET_BATTLE_CLOSE" then
+			header:Show()
+		elseif event == "PET_BATTLE_OPENING_DONE" then
+			header:Hide()
+		end
 		if event == "UNIT_AURA" and unit ~= "player" and unit ~= "vehicle" then return end
 		for _,btn in header:ActiveButtons() do updateAuraButtonStyle(btn, header.filter) end
 		if header.filter == "HELPFUL" then
@@ -547,6 +552,8 @@ local function setHeaderAttributes(header, template, isBuff)
 	header:RegisterEvent("PLAYER_ENTERING_WORLD")
 	header:RegisterEvent("GROUP_ROSTER_UPDATE")
 	header:RegisterEvent("GROUP_JOINED")
+	header:RegisterEvent("PET_BATTLE_CLOSE")
+	header:RegisterEvent("PET_BATTLE_OPENING_DONE")
 	header:HookScript("OnEvent", updateStyle)
 end
 
