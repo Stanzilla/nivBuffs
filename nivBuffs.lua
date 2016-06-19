@@ -8,7 +8,6 @@
 
 	TODO:
 		Rewrite how the AuraButtons are handled to have proper Constructor/Destructor functions
-		Look into if there is still a 3rd weapon enchant
 		Think about if we want to support Consolidation at all
 ]]--
 
@@ -214,7 +213,7 @@ function addon:stackPos(btn)
 end
 
 function addon:createAuraButton(btn, filter)
-	local s, b = 3, 3 / 28
+	local s, b = 1, 3 / 28
 	local n = addon.db.profile
 
 	local ic, tx, cd, br, bd, bg, vf, dr, st
@@ -281,7 +280,9 @@ function addon:createAuraButton(btn, filter)
 	btn.stacks = st
 
 	-- buttonfacade
-	if BF then bfButtons:AddButton(btn.icon, { Icon = btn.icon.tex, Cooldown = btn.cd, Border = btn.BFborder } ) end
+	if BF then 
+		bfButtons:AddButton(btn.icon, { Icon = btn.icon.tex, Cooldown = btn.cd, Border = btn.BFborder } ) 
+	end
 
 	btn.lastUpdate = 0
 	btn.filter = filter
@@ -373,17 +374,24 @@ do
 	local r1, r2, rTime
 
 	UpdateWeaponEnchantButtonCD = function(btn, elapsed)
-		if btn.lastUpdate < btn.freq then btn.lastUpdate = btn.lastUpdate + elapsed; return end
+		if btn.lastUpdate < btn.freq then 
+			btn.lastUpdate = btn.lastUpdate + elapsed
+			return 
+		end
 		btn.lastUpdate = 0
 
-		_, r1, _, _, r2 = GetWeaponEnchantInfo()
+		_, r1, _, _, _, r2, _ = GetWeaponEnchantInfo()
 		rTime = (btn.slotID == 16) and r1 or r2
 
 		btn.rTime = rTime / 1000
 		btn.text:SetText(formatTimeRemaining(btn.rTime))
 
-		if btn.rTime < btn.bTime then btn.freq = .05 end
-		if btn.rTime <= addon.db.profile.blinkTime then updateBlink(btn) end
+		if btn.rTime < btn.bTime then 
+			btn.freq = .05 
+		end
+		if btn.rTime <= addon.db.profile.blinkTime then 
+			updateBlink(btn) 
+		end
 
 		updateBar(btn, 1800)
 	end
@@ -462,10 +470,15 @@ do
 
 			r, g, b = grey, grey, grey
 			c = GetInventoryItemQuality("player", btn.slotID)
-			if addon.db.profile.coloredBorder then r, g, b = GetItemQualityColor(c or 1) end
+			if addon.db.profile.coloredBorder then 
+				r, g, b = GetItemQualityColor(c or 1) 
+			end
 
-			if BF then btn.BFborder:SetVertexColor(r, g, b, 1)
-			else btn.icon:SetBackdropBorderColor(r, g, b, 1) end
+			if BF then 
+				btn.BFborder:SetVertexColor(r, g, b, 1)
+			else 
+				btn.icon:SetBackdropBorderColor(r, g, b, 1) 
+			end
 
 			btn.rTime = rTime / 1000
 			btn.bTime = addon.db.profile.blinkTime + 1.1
@@ -509,12 +522,12 @@ do
 		if event == "UNIT_AURA" and unit ~= "player" and unit ~= "vehicle" then return end
 		for _,btn in header:ActiveButtons() do updateAuraButtonStyle(btn, header.filter) end
 		if header.filter == "HELPFUL" then
-			hasMHe, MHrTime, _, hasOHe, OHrTime = GetWeaponEnchantInfo()
+			hasMHe, MHrTime, _, _, hasOHe, OHrTime, _ = GetWeaponEnchantInfo()
 			wEnch1 = buffHeader:GetAttribute("tempEnchant1")
-			wEnch2 = buffHeader:GetAttribute("tempEnchant2")
+			--wEnch2 = buffHeader:GetAttribute("tempEnchant2")
 
 			if wEnch1 then updateWeaponEnchantButtonStyle(wEnch1, "MainHandSlot", hasMHe, MHrTime) end
-			if wEnch2 then updateWeaponEnchantButtonStyle(wEnch2, "SecondaryHandSlot", hasOHe, OHrTime) end
+			--if wEnch2 then updateWeaponEnchantButtonStyle(wEnch2, "SecondaryHandSlot", hasOHe, OHrTime) end
 		end
 	end
 end
@@ -719,7 +732,7 @@ local LIST_VALUES = {
 	},
 	["outline"] = {
 		NONE         = L["None"],
-		--MONOCHROME   = L["Monochrome"],
+		MONOCHROMEOUTLINE   = L["Monochrome"],
 		OUTLINE      = L["Outline"],
 		THICKOUTLINE = L["Thick outline"],
 	},
@@ -763,13 +776,13 @@ local options = {
 		showWeaponEnch = {
 			order = 15,
 			type = "toggle",
-			name = L["Show weapon enchaments"],
+			name = L["Show weapon enchantments"],
 			desc = ("|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
 		},
 		useButtonFacade = {
 			order = 20,
 			type = "toggle",
-			name = L["Use Masque (ButtonFacade)"],
+			name = L["Use Masque"],
 			desc = ("|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
 		},
 
@@ -830,7 +843,6 @@ local options = {
 			order = 50,
 			type = "toggle",
 			name = L["Show duration bar"],
-			--desc = ("|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
 			set = function (info, v)
 				addon.db.profile[info[1]] = v
 				for _,btn in buffHeader:ActiveButtons() do addon:showDurationBar(btn) end
@@ -841,21 +853,18 @@ local options = {
 			order = 55,
 			type = "toggle",
 			name = L["Show duration text"],
-			--desc = ("|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
 		},
 		remainingTimeFormat = {
 			order = 58,
 			type = "select",
 			name = L["Duration time format"],
 			values = LIST_VALUES["remainingTimeFormat"],
-			--desc = ("|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
 		},
 		durationPos = {
 			order = 60,
 			type = "select",
 			name = L["Duration position"],
 			values = LIST_VALUES["durationPos"],
-			--desc = ("|cffff0000%s|r"):format(L["This change requires reloading UI to take effect"]),
 			set = function (info, v)
 				addon.db.profile[info[1]] = v
 				for _,btn in buffHeader:ActiveButtons() do addon:durationPos(btn) end
@@ -1304,6 +1313,7 @@ local options = {
 
 local function slashCommand(input)
 	InterfaceOptionsFrame_OpenToCategory("nivBuffs")
+	InterfaceOptionsFrame_OpenToCategory("nivBuffs")
 end
 
 -----------------------------------------------------------------------
@@ -1344,7 +1354,7 @@ function nivBuffs:ADDON_LOADED(event, addon)
 		local h = function(f) f.Show = f.Hide; f:Hide() end
 		h(BuffFrame)
 		h(TemporaryEnchantFrame)
-		h(ConsolidatedBuffs)
+		--h(ConsolidatedBuffs)
 
 		-- buttonfacade
 		if not self.db.profile.nivBuffs_BF then self.db.profile.nivBuffs_BF = {} end
@@ -1353,7 +1363,7 @@ function nivBuffs:ADDON_LOADED(event, addon)
 			LBF:Register("nivBuffs", self.BFSkinCallBack, self)
 
 			bfButtons = LBF:Group("nivBuffs")
-			bfButtons:Skin(self.db.profile.nivBuffs_BF.skinID, self.db.profile.nivBuffs_BF.gloss, self.db.profile.nivBuffs_BF.backdrop, self.db.profile.nivBuffs_BF.colors)
+			bfButtons:AddButton(self.db.profile.nivBuffs_BF.skinID, self.db.profile.nivBuffs_BF.gloss, self.db.profile.nivBuffs_BF.backdrop, self.db.profile.nivBuffs_BF.colors)
 		end
 
 		-- init headers
@@ -1364,9 +1374,6 @@ function nivBuffs:ADDON_LOADED(event, addon)
 		setHeaderAttributes(debuffHeader, "nivDebuffButtonTemplate", false)
 		debuffHeader:SetPoint(unpack(self.db.profile.debuffAnchor))
 		debuffHeader:Show()
-
-		-- tidy up
-		collectgarbage("collect") -- not sure how good of an idea this is, in case someone logs back mid combat
 end
 
 function nivBuffs:BFSkinCallBack(skinID, gloss, backdrop, group, button, colors)

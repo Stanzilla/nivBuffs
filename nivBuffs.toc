@@ -1,6 +1,6 @@
-## Interface: 50400
+## Interface: 70000
 ## Title: nivBuffs
-## Author: Luzzifus, Caleb
+## Author: Luzzifus, Caleb, Stanzilla
 ## OptionalDeps: Masque
 ## SavedVariables: nivBuffDB
 

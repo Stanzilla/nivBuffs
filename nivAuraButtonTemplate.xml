@@ -13,7 +13,7 @@
 				GameTooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT");
 				GameTooltip:SetFrameLevel(self:GetFrameLevel() + 2);
 				local s = self.slotID or 0;
-				if s == 16 or s == 17 or s == 18 then
+				if s == 16 or s == 17 then
 					GameTooltip:SetInventoryItem("player", s);
 				else
 					GameTooltip:SetUnitAura(UnitInVehicle("player") and "vehicle" or "player", self:GetID(), "HELPFUL");
