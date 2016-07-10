@@ -11,6 +11,8 @@
 		Think about if we want to support Consolidation at all
 ]]--
 
+-- GLOBALS: SlashCmdList SLASH_nivBuffs1 SLASH_nivBuffs2
+
 -- upvalues
 local CreateFrame = CreateFrame
 local GameFontNormalSmall = GameFontNormalSmall
@@ -280,8 +282,8 @@ function addon:createAuraButton(btn, filter)
 	btn.stacks = st
 
 	-- buttonfacade
-	if BF then 
-		bfButtons:AddButton(btn.icon, { Icon = btn.icon.tex, Cooldown = btn.cd, Border = btn.BFborder } ) 
+	if BF then
+		bfButtons:AddButton(btn.icon, { Icon = btn.icon.tex, Cooldown = btn.cd, Border = btn.BFborder } )
 	end
 
 	btn.lastUpdate = 0
@@ -374,9 +376,9 @@ do
 	local r1, r2, rTime
 
 	UpdateWeaponEnchantButtonCD = function(btn, elapsed)
-		if btn.lastUpdate < btn.freq then 
+		if btn.lastUpdate < btn.freq then
 			btn.lastUpdate = btn.lastUpdate + elapsed
-			return 
+			return
 		end
 		btn.lastUpdate = 0
 
@@ -386,11 +388,11 @@ do
 		btn.rTime = rTime / 1000
 		btn.text:SetText(formatTimeRemaining(btn.rTime))
 
-		if btn.rTime < btn.bTime then 
-			btn.freq = .05 
+		if btn.rTime < btn.bTime then
+			btn.freq = .05
 		end
-		if btn.rTime <= addon.db.profile.blinkTime then 
-			updateBlink(btn) 
+		if btn.rTime <= addon.db.profile.blinkTime then
+			updateBlink(btn)
 		end
 
 		updateBar(btn, 1800)
@@ -470,14 +472,14 @@ do
 
 			r, g, b = grey, grey, grey
 			c = GetInventoryItemQuality("player", btn.slotID)
-			if addon.db.profile.coloredBorder then 
-				r, g, b = GetItemQualityColor(c or 1) 
+			if addon.db.profile.coloredBorder then
+				r, g, b = GetItemQualityColor(c or 1)
 			end
 
-			if BF then 
+			if BF then
 				btn.BFborder:SetVertexColor(r, g, b, 1)
-			else 
-				btn.icon:SetBackdropBorderColor(r, g, b, 1) 
+			else
+				btn.icon:SetBackdropBorderColor(r, g, b, 1)
 			end
 
 			btn.rTime = rTime / 1000
@@ -1349,12 +1351,11 @@ function nivBuffs:ADDON_LOADED(event, addon)
 		BF = LBF and self.db.profile.useButtonFacade
 		grey = self.db.profile.borderBrightness
 		blinkStep = self.db.profile.blinkSpeed / 10
-		-- hide blizz auras
-		BuffFrame:UnregisterEvent("UNIT_AURA")
-		local h = function(f) f.Show = f.Hide; f:Hide() end
-		h(BuffFrame)
-		h(TemporaryEnchantFrame)
-		--h(ConsolidatedBuffs)
+
+		-- hide Blizzard Aura Frames
+		BuffFrame:Hide()
+		TemporaryEnchantFrame:Hide()
+		BuffFrame:UnregisterAllEvents()
 
 		-- buttonfacade
 		if not self.db.profile.nivBuffs_BF then self.db.profile.nivBuffs_BF = {} end
