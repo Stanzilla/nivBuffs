@@ -71,6 +71,6 @@ L["Positive values adjust upwards, negative values adjust downwards"] = true
 L["Sort type"] = true
 L["Ascending"] = true
 L["Descending"] = true
-
-
+L["Use Masque"] = true
+L["Show weapon enchantments"] = true
 
