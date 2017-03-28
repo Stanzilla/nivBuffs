@@ -1,5 +1,5 @@
-## Interface: 70100
-## Title: nivBuffs
+## Interface: 70200
+## Title: nivBuffs vStan
 ## Author: Luzzifus, Caleb, Stanzilla
 ## OptionalDeps: Masque
 ## SavedVariables: nivBuffDB
