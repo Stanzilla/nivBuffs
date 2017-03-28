@@ -11,16 +11,12 @@
 		Think about if we want to support Consolidation at all
 ]]--
 
--- GLOBALS: SlashCmdList SLASH_nivBuffs1 SLASH_nivBuffs2
+-- luacheck: globals SlashCmdList SLASH_nivBuffs1 SLASH_nivBuffs2 GameFontNormalSmall DebuffTypeColor TemporaryEnchantFrame BuffFrame
 
 -- upvalues
-local CreateFrame = CreateFrame
-local GameFontNormalSmall = GameFontNormalSmall
-local unpack = unpack
-local floor = floor
-local ceil = ceil
+local unpack, floor, ceil = unpack, floor, ceil
 local UnitAura = UnitAura
-local _ = _
+local _
 local GetTime = GetTime
 local GetWeaponEnchantInfo = GetWeaponEnchantInfo
 local DebuffTypeColor = DebuffTypeColor
@@ -29,17 +25,10 @@ local GetInventoryItemTexture = GetInventoryItemTexture
 local GetInventoryItemQuality = GetInventoryItemQuality
 local GetItemQualityColor = GetItemQualityColor
 local TemporaryEnchantFrame = TemporaryEnchantFrame
-local ConsolidatedBuffs = ConsolidatedBuffs
 local collectgarbage = collectgarbage
 local BuffFrame = BuffFrame
 local LibStub = LibStub
-local InterfaceOptionsFrame_OpenToCategory = InterfaceOptionsFrame_OpenToCategory
-local tonumber = tonumber
-local tostring = tostring
-local pairs = pairs
-local print = print
-local next = next
-local UIParent = UIParent
+local tonumber, tostring, pairs, next = tonumber, tostring, pairs, next
 local UnitInVehicle = UnitInVehicle
 
 local BF = nil
@@ -513,7 +502,7 @@ end
 
 local updateStyle
 do
-	local hasMHe, MHrTime, hasOHe, OHrTime, wEnch1, wEnch2
+	local hasMHe, MHrTime, wEnch1, wEnch2
 
 	updateStyle = function(header, event, unit)
 		if event == "PET_BATTLE_CLOSE" then
@@ -524,7 +513,7 @@ do
 		if event == "UNIT_AURA" and unit ~= "player" and unit ~= "vehicle" then return end
 		for _,btn in header:ActiveButtons() do updateAuraButtonStyle(btn, header.filter) end
 		if header.filter == "HELPFUL" then
-			hasMHe, MHrTime, _, _, hasOHe, OHrTime, _ = GetWeaponEnchantInfo()
+			hasMHe, MHrTime, _, _, _, _, _ = GetWeaponEnchantInfo()
 			wEnch1 = buffHeader:GetAttribute("tempEnchant1")
 			--wEnch2 = buffHeader:GetAttribute("tempEnchant2")
 
