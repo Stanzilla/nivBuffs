@@ -1,4 +1,4 @@
-## Interface: 70200
+## Interface: 70300
 ## Title: nivBuffs vStan
 ## Author: Luzzifus, Caleb, Stanzilla
 ## OptionalDeps: Masque
