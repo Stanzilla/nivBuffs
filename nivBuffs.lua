@@ -346,7 +346,7 @@ do
 		if btn.lastUpdate < btn.freq then btn.lastUpdate = btn.lastUpdate + elapsed; return end
 		btn.lastUpdate = 0
 
-		name, _, _, _, _, duration, eTime = UnitAura(UnitInVehicle("player") and "vehicle" or "player", btn:GetID(), btn.filter)
+		name, _, _, _, duration, eTime = UnitAura(UnitInVehicle("player") and "vehicle" or "player", btn:GetID(), btn.filter)
 		if name and duration > 0 then
 			msecs = eTime - GetTime()
 			btn.text:SetText(formatTimeRemaining(msecs))
@@ -395,7 +395,7 @@ do
 
 	updateAuraButtonStyle = function(btn, filter)
 		if not btn.created then addon:createAuraButton(btn, filter) end
-		name, _, icon, count, dType, duration, eTime = UnitAura(UnitInVehicle("player") and "vehicle" or "player", btn:GetID(), filter)
+		name, icon, count, dType, duration, eTime = UnitAura(UnitInVehicle("player") and "vehicle" or "player", btn:GetID(), filter)
 		if name then
 			btn.icon.tex:SetTexture(icon)
 
