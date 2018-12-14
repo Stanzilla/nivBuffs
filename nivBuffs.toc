@@ -1,4 +1,4 @@
-## Interface: 80000
+## Interface: 80100
 ## Title: nivBuffs vStan
 ## Author: Luzzifus, Caleb, Stanzilla
 ## OptionalDeps: Masque
