@@ -130,7 +130,7 @@ nivBuffs:RegisterEvent("ADDON_LOADED")
 local addon = nivBuffs
 
 local CallbackHandler = LibStub("CallbackHandler-1.0")
-local LBF = LibStub('Masque', true)
+local MSQ = LibStub('Masque', true)
 local L = LibStub("AceLocale-3.0"):GetLocale("nivBuffs")
 local LSM3 = LibStub("LibSharedMedia-3.0")
 local bfButtons = {}
@@ -1337,7 +1337,7 @@ function nivBuffs:ADDON_LOADED(event, addon)
 		SlashCmdList.nivBuffs = slashCommand
 		SLASH_nivBuffs1 = "/nivbuffs"
 		SLASH_nivBuffs2 = "/niv"
-		BF = LBF and self.db.profile.useButtonFacade
+		BF = MSQ and self.db.profile.useButtonFacade
 		grey = self.db.profile.borderBrightness
 		blinkStep = self.db.profile.blinkSpeed / 10
 
@@ -1346,14 +1346,8 @@ function nivBuffs:ADDON_LOADED(event, addon)
 		TemporaryEnchantFrame:Hide()
 		BuffFrame:UnregisterAllEvents()
 
-		-- buttonfacade
-		if not self.db.profile.nivBuffs_BF then self.db.profile.nivBuffs_BF = {} end
-
 		if BF then
-			LBF:Register("nivBuffs", self.BFSkinCallBack, self)
-
-			bfButtons = LBF:Group("nivBuffs")
-			bfButtons:AddButton(self.db.profile.nivBuffs_BF.skinID, self.db.profile.nivBuffs_BF.gloss, self.db.profile.nivBuffs_BF.backdrop, self.db.profile.nivBuffs_BF.colors)
+			bfButtons = MSQ:Group("nivBuffs")
 		end
 
 		-- init headers
@@ -1364,12 +1358,4 @@ function nivBuffs:ADDON_LOADED(event, addon)
 		setHeaderAttributes(debuffHeader, "nivDebuffButtonTemplate", false)
 		debuffHeader:SetPoint(unpack(self.db.profile.debuffAnchor))
 		debuffHeader:Show()
-end
-
-function nivBuffs:BFSkinCallBack(skinID, gloss, backdrop, group, button, colors)
-	if group then return end
-	self.db.profile.nivBuffs_BF.skinID = skinID
-	self.db.profile.nivBuffs_BF.gloss = gloss
-	self.db.profile.nivBuffs_BF.backdrop = backdrop
-	self.db.profile.nivBuffs_BF.colors = colors
 end
