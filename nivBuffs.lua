@@ -1,6 +1,6 @@
 --[[
 	Originally created by Luzzifus
-	Updated by Caleb
+	Updated by Caleb & Stanzilla
 
 	Further credits as seen on http://www.wowinterface.com/downloads/info18440-nivBuffs.html
 	Credits:
@@ -11,7 +11,11 @@
 		Think about if we want to support Consolidation at all
 ]]--
 
--- luacheck: globals SlashCmdList SLASH_nivBuffs1 SLASH_nivBuffs2 GameFontNormalSmall DebuffTypeColor TemporaryEnchantFrame BuffFrame
+-- luacheck: globals SlashCmdList SLASH_nivBuffs1 SLASH_nivBuffs2 GameFontNormalSmall DebuffTypeColor TemporaryEnchantFrame BuffFrame WOW_PROJECT_ID WOW_PROJECT_CLASSIC
+
+local function IsClassic()
+    return WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
+end
 
 -- upvalues
 local unpack, floor, ceil = unpack, floor, ceil
@@ -30,6 +34,12 @@ local BuffFrame = BuffFrame
 local LibStub = LibStub
 local tonumber, tostring, pairs, next = tonumber, tostring, pairs, next
 local UnitInVehicle = UnitInVehicle
+
+if not IsClassic() then
+   UnitInVehicle = UnitInVehicle
+else
+   UnitInVehicle = function() return false end
+end
 
 local BF = nil
 local grey = nil
@@ -394,8 +404,8 @@ do
 	local c = {}
 
 	updateAuraButtonStyle = function(btn, filter)
-		if not btn.created then addon:createAuraButton(btn, filter) end
-		name, icon, count, dType, duration, eTime = UnitAura(UnitInVehicle("player") and "vehicle" or "player", btn:GetID(), filter)
+        if not btn.created then addon:createAuraButton(btn, filter) end
+            name, icon, count, dType, duration, eTime = UnitAura(UnitInVehicle("player") and "vehicle" or "player", btn:GetID(), filter)
 		if name then
 			btn.icon.tex:SetTexture(icon)
 
@@ -527,7 +537,7 @@ local function setHeaderAttributes(header, template, isBuff)
 	local s = function(...) header:SetAttribute(...) end
 	local n = addon.db.profile
 
-	s("unit", UnitInVehicle("player") and "vehicle" or "player")
+    s("unit", UnitInVehicle("player") and "vehicle" or "player")
 	s("filter", isBuff and "HELPFUL" or "HARMFUL")
 	s("template", template)
 	s("separateOwn", 0)
@@ -555,9 +565,11 @@ local function setHeaderAttributes(header, template, isBuff)
 
 	header:RegisterEvent("PLAYER_ENTERING_WORLD")
 	header:RegisterEvent("GROUP_ROSTER_UPDATE")
-	header:RegisterEvent("GROUP_JOINED")
-	header:RegisterEvent("PET_BATTLE_CLOSE")
-	header:RegisterEvent("PET_BATTLE_OPENING_DONE")
+    header:RegisterEvent("GROUP_JOINED")
+    if not IsClassic() then
+        header:RegisterEvent("PET_BATTLE_CLOSE")
+        header:RegisterEvent("PET_BATTLE_OPENING_DONE")
+    end
 	header:HookScript("OnEvent", updateStyle)
 end
 
