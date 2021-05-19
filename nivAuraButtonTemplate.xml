@@ -13,9 +13,12 @@
                 local function IsClassic()
                     return WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
                 end
+                local function IsRetail()
+                    return WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
+                end
                 local UnitInVehicle = UnitInVehicle
 
-                if not IsClassic() then
+                if IsRetail() then
                     UnitInVehicle = UnitInVehicle
                 else
                 UnitInVehicle = function() return false end
@@ -43,7 +46,7 @@
                 end
                 local UnitInVehicle = UnitInVehicle
 
-                if not IsClassic() then
+                if IsRetail() then
                     UnitInVehicle = UnitInVehicle
                 else
                 UnitInVehicle = function() return false end

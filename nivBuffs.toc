@@ -1,4 +1,6 @@
-## Interface: 80100
+## Interface: 90005
+## Interface-Classic: 11307
+## Interface-BCC: 20501
 ## Title: nivBuffs vStan
 ## Author: Luzzifus, Caleb, Stanzilla
 ## OptionalDeps: Masque

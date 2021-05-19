@@ -17,6 +17,10 @@ local function IsClassic()
     return WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
 end
 
+local function IsRetail()
+    return WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
+end
+
 -- upvalues
 local unpack, floor, ceil = unpack, floor, ceil
 local UnitAura = UnitAura
@@ -35,7 +39,7 @@ local LibStub = LibStub
 local tonumber, tostring, pairs, next = tonumber, tostring, pairs, next
 local UnitInVehicle = UnitInVehicle
 
-if not IsClassic() then
+if IsRetail() then
    UnitInVehicle = UnitInVehicle
 else
    UnitInVehicle = function() return false end
@@ -566,7 +570,7 @@ local function setHeaderAttributes(header, template, isBuff)
 	header:RegisterEvent("PLAYER_ENTERING_WORLD")
 	header:RegisterEvent("GROUP_ROSTER_UPDATE")
     header:RegisterEvent("GROUP_JOINED")
-    if not IsClassic() then
+    if IsRetail() then
         header:RegisterEvent("PET_BATTLE_CLOSE")
         header:RegisterEvent("PET_BATTLE_OPENING_DONE")
     end
