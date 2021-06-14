@@ -7,33 +7,37 @@
 		</Attributes>
 		<Scripts>
 			<OnLoad>
-				self:RegisterForClicks("RightButtonUp");
+				self:RegisterForClicks("RightButtonUp")
 			</OnLoad>
 			<OnEnter>
                 local function IsClassic()
                     return WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
                 end
+
                 local function IsRetail()
                     return WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
                 end
+
                 local UnitInVehicle = UnitInVehicle
 
                 if IsRetail() then
                     UnitInVehicle = UnitInVehicle
                 else
-                UnitInVehicle = function() return false end
+                    UnitInVehicle = function() return false end
                 end
-				GameTooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT");
-				GameTooltip:SetFrameLevel(self:GetFrameLevel() + 2);
-				local s = self.slotID or 0;
+
+				GameTooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT")
+				GameTooltip:SetFrameLevel(self:GetFrameLevel() + 2)
+
+                local s = self.slotID or 0
 				if s == 16 or s == 17 then
-					GameTooltip:SetInventoryItem("player", s);
+					GameTooltip:SetInventoryItem("player", s)
 				else
-					GameTooltip:SetUnitAura(UnitInVehicle("player") and "vehicle" or "player", self:GetID(), "HELPFUL");
+					GameTooltip:SetUnitAura(UnitInVehicle("player") and "vehicle" or "player", self:GetID(), "HELPFUL")
 				end
 			</OnEnter>
 			<OnLeave>
-				GameTooltip:Hide();
+				GameTooltip:Hide()
 			</OnLeave>
 		</Scripts>
 	</Button>
@@ -44,19 +48,25 @@
                 local function IsClassic()
                     return WOW_PROJECT_ID == WOW_PROJECT_CLASSIC
                 end
+
+                local function IsRetail()
+                    return WOW_PROJECT_ID == WOW_PROJECT_MAINLINE
+                end
+
                 local UnitInVehicle = UnitInVehicle
 
                 if IsRetail() then
                     UnitInVehicle = UnitInVehicle
                 else
-                UnitInVehicle = function() return false end
+                    UnitInVehicle = function() return false end
                 end
-				GameTooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT");
-				GameTooltip:SetFrameLevel(self:GetFrameLevel() + 2);
-				GameTooltip:SetUnitAura(UnitInVehicle("player") and "vehicle" or "player", self:GetID(), "HARMFUL");
+
+				GameTooltip:SetOwner(self, "ANCHOR_BOTTOMLEFT")
+				GameTooltip:SetFrameLevel(self:GetFrameLevel() + 2)
+				GameTooltip:SetUnitAura(UnitInVehicle("player") and "vehicle" or "player", self:GetID(), "HARMFUL")
 			</OnEnter>
 			<OnLeave>
-				GameTooltip:Hide();
+				GameTooltip:Hide()
 			</OnLeave>
 		</Scripts>
 	</Button>
