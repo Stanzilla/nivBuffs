@@ -386,14 +386,19 @@ do
 		btn.lastUpdate = 0
 
 		_, r1, _, _, _, r2, _ = GetWeaponEnchantInfo()
+
 		rTime = (btn.slotID == 16) and r1 or r2
 
+        if not rTime then
+            rTime = 0
+        end
 		btn.rTime = rTime / 1000
 		btn.text:SetText(formatTimeRemaining(btn.rTime))
 
 		if btn.rTime < btn.bTime then
 			btn.freq = .05
 		end
+
 		if btn.rTime <= addon.db.profile.blinkTime then
 			updateBlink(btn)
 		end
