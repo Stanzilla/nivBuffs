@@ -3,6 +3,8 @@
 ## Interface-BCC: 20503
 ## Title: nivBuffs vStan
 ## Author: Luzzifus, Caleb, Stanzilla
+## Version: @project-version@
+## Notes: A very simple buff/debuff frame addon with support for Masque.
 ## OptionalDeps: Masque
 ## SavedVariables: nivBuffDB
 
