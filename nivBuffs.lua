@@ -385,8 +385,7 @@ do
 		end
 		btn.lastUpdate = 0
 
-		_, r1, _, _, _, r2, _ = GetWeaponEnchantInfo()
-
+        hasMainHandEnchant, r1, mainHandCharges, mainHandEnchantID, hasOffHandEnchant, r2, offHandCharges, offHandEnchantID = GetWeaponEnchantInfo()
 		rTime = (btn.slotID == 16) and r1 or r2
 
         if not rTime then
@@ -530,14 +529,14 @@ do
 			header:Hide()
 		end
 		if event == "UNIT_AURA" and unit ~= "player" and unit ~= "vehicle" then return end
-		for _,btn in header:ActiveButtons() do updateAuraButtonStyle(btn, header.filter) end
+		for _, btn in header:ActiveButtons() do updateAuraButtonStyle(btn, header.filter) end
 		if header.filter == "HELPFUL" then
-			hasMHe, MHrTime, _, _, _, _, _ = GetWeaponEnchantInfo()
+			hasMHe, MHrTime, mainHandCharges, mainHandEnchantID, hasOHe, OHrTime, offHandCharges, offHandEnchantID = GetWeaponEnchantInfo()
 			wEnch1 = buffHeader:GetAttribute("tempEnchant1")
-			--wEnch2 = buffHeader:GetAttribute("tempEnchant2")
+			wEnch2 = buffHeader:GetAttribute("tempEnchant2")
 
 			if wEnch1 then updateWeaponEnchantButtonStyle(wEnch1, "MainHandSlot", hasMHe, MHrTime) end
-			--if wEnch2 then updateWeaponEnchantButtonStyle(wEnch2, "SecondaryHandSlot", hasOHe, OHrTime) end
+			if wEnch2 then updateWeaponEnchantButtonStyle(wEnch2, "SecondaryHandSlot", hasOHe, OHrTime) end
 		end
 	end
 end
